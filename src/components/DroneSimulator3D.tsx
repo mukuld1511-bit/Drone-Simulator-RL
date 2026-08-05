@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Play, Pause, RotateCcw, Compass, ShieldAlert, Target, Zap, Cpu, Eyedropper, Eye } from 'lucide-react';
+import { Play, Pause, RotateCcw, Compass, ShieldAlert, Target, Zap, Cpu, Eye } from 'lucide-react';
 
 interface Obstacle {
   id: number;
@@ -45,6 +45,7 @@ export function DroneSimulator3D({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [cameraMode, setCameraMode] = useState<'orbit' | 'follow' | 'top'>('orbit');
+  const [speedMultiplier, setSpeedMultiplier] = useState(simSpeed);
 
   // Simulation internal state ref for high performance rendering loop
   const simRef = useRef<SimState>({
@@ -85,60 +86,46 @@ export function DroneSimulator3D({
   }, []);
 
   // Reset World Episode
-  const resetEpisode = useCallback(() => {
-    const worldSize = 100;
-    const startPos: [number, number, number] = [
-      10 + Math.random() * 15,
-      10 + Math.random() * 15,
-      10 + Math.random() * 15
-    ];
-    const goalPos: [number, number, number] = [
-      worldSize - 25 + Math.random() * 15,
-      worldSize - 25 + Math.random() * 15,
-      worldSize - 25 + Math.random() * 15
-    ];
+  const resetEpisode = useCallback(async () => {
+    try {
+      const response = await fetch('/api/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numObstacles, numRays })
+      });
+      const data = await response.json();
+      
+      const startPos = data.drone_pos as [number, number, number];
+      const goalPos = data.goal_pos as [number, number, number];
+      const newObstacles = data.obstacles as Obstacle[];
+      const distToGoal = Math.hypot(goalPos[0] - startPos[0], goalPos[1] - startPos[1], goalPos[2] - startPos[2]);
+      const rayDirs = generateRayDirections(numRays);
 
-    const newObstacles: Obstacle[] = [];
-    for (let i = 0; i < numObstacles; i++) {
-      const radius = 4 + Math.random() * 6;
-      const pos: [number, number, number] = [
-        radius + 10 + Math.random() * (worldSize - 20 - 2 * radius),
-        radius + 10 + Math.random() * (worldSize - 20 - 2 * radius),
-        radius + 10 + Math.random() * (worldSize - 20 - 2 * radius)
-      ];
-      // Check clearance from start and goal
-      const dStart = Math.hypot(pos[0] - startPos[0], pos[1] - startPos[1], pos[2] - startPos[2]);
-      const dGoal = Math.hypot(pos[0] - goalPos[0], pos[1] - goalPos[1], pos[2] - goalPos[2]);
-      if (dStart > radius + 15 && dGoal > radius + 15) {
-        newObstacles.push({ id: i, position: pos, radius });
-      }
+      const updated: SimState = {
+        ...simRef.current,
+        dronePos: startPos,
+        droneVel: [0, 0, 0],
+        goalPos: goalPos,
+        obstacles: newObstacles,
+        stepCount: 0,
+        episodeCount: simRef.current.episodeCount + (simRef.current.stepCount > 0 ? 1 : 0),
+        distToGoal,
+        lastActionName: 'RESET',
+        lastReward: 0,
+        totalReward: 0,
+        status: 'flying',
+        rayVectors: rayDirs,
+        rayDistances: Array(numRays).fill(30),
+        trajectory: [startPos],
+        epsilon: Math.max(0.05, simRef.current.epsilon * 0.995)
+      };
+
+      simRef.current = updated;
+      setUiState(updated);
+      if (onStateUpdate) onStateUpdate(updated);
+    } catch (err) {
+      console.error("Failed to reset via API:", err);
     }
-
-    const rayDirs = generateRayDirections(numRays);
-    const distToGoal = Math.hypot(goalPos[0] - startPos[0], goalPos[1] - startPos[1], goalPos[2] - startPos[2]);
-
-    const updated: SimState = {
-      ...simRef.current,
-      dronePos: startPos,
-      droneVel: [0, 0, 0],
-      goalPos: goalPos,
-      obstacles: newObstacles,
-      stepCount: 0,
-      episodeCount: simRef.current.episodeCount + (simRef.current.stepCount > 0 ? 1 : 0),
-      distToGoal,
-      lastActionName: 'RESET',
-      lastReward: 0,
-      totalReward: 0,
-      status: 'flying',
-      rayVectors: rayDirs,
-      rayDistances: Array(numRays).fill(30),
-      trajectory: [startPos],
-      epsilon: Math.max(0.05, simRef.current.epsilon * 0.995)
-    };
-
-    simRef.current = updated;
-    setUiState(updated);
-    if (onStateUpdate) onStateUpdate(updated);
   }, [numObstacles, numRays, generateRayDirections, onStateUpdate]);
 
   // Initial setup trigger
@@ -153,10 +140,10 @@ export function DroneSimulator3D({
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Scene, Camera, Renderer
+    // Scene, Camera, Renderer - Light Theme!
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0e17);
-    scene.fog = new THREE.FogExp2(0x0a0e17, 0.003);
+    scene.background = new THREE.Color(0xf1f5f9);
+    scene.fog = new THREE.FogExp2(0xf1f5f9, 0.003);
 
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500);
     camera.position.set(130, 120, 160);
@@ -187,13 +174,13 @@ export function DroneSimulator3D({
     // 100x100x100 Bounding Box Wireframe
     const boxGeo = new THREE.BoxGeometry(100, 100, 100);
     const boxEdges = new THREE.EdgesGeometry(boxGeo);
-    const boxMat = new THREE.LineBasicMaterial({ color: 0x1e293b, linewidth: 2 });
+    const boxMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
     const worldBox = new THREE.LineSegments(boxEdges, boxMat);
     worldBox.position.set(50, 50, 50);
     scene.add(worldBox);
 
     // Grid Floor
-    const gridHelper = new THREE.GridHelper(100, 20, 0x334155, 0x1e293b);
+    const gridHelper = new THREE.GridHelper(100, 20, 0x94a3b8, 0xe2e8f0);
     gridHelper.position.set(50, 0, 50);
     scene.add(gridHelper);
 
@@ -316,23 +303,38 @@ export function DroneSimulator3D({
       goalMesh.position.set(s.goalPos[0], s.goalPos[1], s.goalPos[2]);
       goalRing.position.set(s.goalPos[0], s.goalPos[1], s.goalPos[2]);
 
-      // Re-populate obstacle meshes if list changed
+      // Re-populate obstacle meshes if list changed (Convert red spheres to Trees)
       if (obstacleGroup.children.length !== s.obstacles.length) {
         while (obstacleGroup.children.length > 0) {
           obstacleGroup.remove(obstacleGroup.children[0]);
         }
         s.obstacles.forEach(obs => {
-          const geo = new THREE.SphereGeometry(obs.radius, 20, 20);
-          const mat = new THREE.MeshStandardMaterial({
-            color: 0xef4444,
-            roughness: 0.3,
-            metalness: 0.2,
+          const treeGroup = new THREE.Group();
+          
+          // Trunk
+          const trunkHeight = obs.radius * 1.5;
+          const trunkGeo = new THREE.CylinderGeometry(obs.radius * 0.2, obs.radius * 0.3, trunkHeight);
+          const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+          const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+          trunk.position.y = trunkHeight / 2;
+          trunk.castShadow = true;
+          treeGroup.add(trunk);
+
+          // Leaves
+          const leafGeo = new THREE.SphereGeometry(obs.radius, 16, 16);
+          const leafMat = new THREE.MeshStandardMaterial({ 
+            color: 0x22c55e, 
+            roughness: 0.8,
             transparent: true,
-            opacity: 0.65
+            opacity: 0.9
           });
-          const mesh = new THREE.Mesh(geo, mat);
-          mesh.position.set(obs.position[0], obs.position[1], obs.position[2]);
-          obstacleGroup.add(mesh);
+          const leaves = new THREE.Mesh(leafGeo, leafMat);
+          leaves.position.y = trunkHeight + obs.radius * 0.5;
+          leaves.castShadow = true;
+          treeGroup.add(leaves);
+
+          treeGroup.position.set(obs.position[0], 0, obs.position[2]); // Place on ground
+          obstacleGroup.add(treeGroup);
         });
       }
 
@@ -391,219 +393,154 @@ export function DroneSimulator3D({
     };
   }, [cameraMode]);
 
-  // Physics Simulation Step execution
-  const executeStep = useCallback(() => {
+  // Physics Simulation Step execution via API
+  const executeStep = useCallback(async () => {
     const s = simRef.current;
     if (s.status !== 'flying') {
-      resetEpisode();
       return;
     }
 
-    // Determine Action vector [dx, dy, dz]
-    // 6 actions: +X, -X, +Y, -Y, +Z, -Z
-    let actionIndex = 0;
-
-    // Direct path guidance + obstacle avoidance heuristic policy
-    const relGoal = [
-      s.goalPos[0] - s.dronePos[0],
-      s.goalPos[1] - s.dronePos[1],
-      s.goalPos[2] - s.dronePos[2]
-    ];
-
-    // Compute ray distances to obstacles
-    const rayDirs = s.rayVectors;
-    const rayDists: number[] = [];
-    let minObstacleDist = 999;
-
-    rayDirs.forEach(([rx, ry, rz]) => {
-      let dMin = 30.0;
-      s.obstacles.forEach(obs => {
-        // Simple ray sphere intersection
-        const oc = [
-          s.dronePos[0] - obs.position[0],
-          s.dronePos[1] - obs.position[1],
-          s.dronePos[2] - obs.position[2]
-        ];
-        const b = 2 * (rx * oc[0] + ry * oc[1] + rz * oc[2]);
-        const c = (oc[0] * oc[0] + oc[1] * oc[1] + oc[2] * oc[2]) - obs.radius * obs.radius;
-        const disc = b * b - 4 * c;
-        if (disc >= 0) {
-          const t = (-b - Math.sqrt(disc)) / 2;
-          if (t > 0 && t < dMin) {
-            dMin = t;
-          }
-        }
+    try {
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode })
       });
-      rayDists.push(dMin);
-      if (dMin < minObstacleDist) minObstacleDist = dMin;
-    });
+      const data = await response.json();
+      
+      const actionIndex = data.action;
+      const newPos = data.drone_pos as [number, number, number];
+      const reward = data.reward;
+      const goalReached = data.goal_reached;
+      const collision = data.collision;
+      
+      const actionNames = ['+X (Forward)', '-X (Backward)', '+Y (Right)', '-Y (Left)', '+Z (Ascend)', '-Z (Descend)'];
+      const currentDist = Math.hypot(s.goalPos[0] - newPos[0], s.goalPos[1] - newPos[1], s.goalPos[2] - newPos[2]);
+      
+      let status: SimState['status'] = 'flying';
+      let successCount = s.successCount;
+      let collisionCount = s.collisionCount;
 
-    // Policy decision
-    const actionNames = ['+X (Forward)', '-X (Backward)', '+Y (Right)', '-Y (Left)', '+Z (Ascend)', '-Z (Descend)'];
-    const actionVectors = [
-      [1, 0, 0],
-      [-1, 0, 0],
-      [0, 1, 0],
-      [0, -1, 0],
-      [0, 0, 1],
-      [0, 0, -1]
-    ];
+      if (goalReached) {
+        status = 'goal_reached';
+        successCount += 1;
+      } else if (collision || data.terminated || data.truncated) {
+        status = collision ? 'collision' : 'out_of_bounds';
+        collisionCount += 1;
+      }
 
-    // Epsilon-greedy selection
-    if (Math.random() < s.epsilon && mode !== 'policy') {
-      actionIndex = Math.floor(Math.random() * 6);
-    } else {
-      // Choose action that moves closest to goal without hitting obstacle
-      let bestScore = -999999;
-      actionVectors.forEach((v, idx) => {
-        const nextP: [number, number, number] = [
-          s.dronePos[0] + v[0] * 2,
-          s.dronePos[1] + v[1] * 2,
-          s.dronePos[2] + v[2] * 2
-        ];
-        const dGoal = Math.hypot(s.goalPos[0] - nextP[0], s.goalPos[1] - nextP[1], s.goalPos[2] - nextP[2]);
-        
-        // Obstacle penalty
-        let obsPen = 0;
-        s.obstacles.forEach(o => {
-          const dObs = Math.hypot(nextP[0] - o.position[0], nextP[1] - o.position[1], nextP[2] - o.position[2]);
-          if (dObs < o.radius + 3) obsPen += 100 / (dObs - o.radius + 0.1);
-        });
+      const updated: SimState = {
+        ...s,
+        dronePos: newPos,
+        droneVel: [newPos[0] - s.dronePos[0], newPos[1] - s.dronePos[1], newPos[2] - s.dronePos[2]],
+        stepCount: s.stepCount + 1,
+        distToGoal: currentDist,
+        lastActionName: actionNames[actionIndex] || 'NONE',
+        lastReward: reward,
+        totalReward: s.totalReward + reward,
+        status,
+        trajectory: [...s.trajectory, newPos],
+        successCount,
+        collisionCount
+      };
 
-        const score = -dGoal - obsPen;
-        if (score > bestScore) {
-          bestScore = score;
-          actionIndex = idx;
-        }
-      });
-    }
+      simRef.current = updated;
+      setUiState(updated);
+      if (onStateUpdate) onStateUpdate(updated);
 
-    const move = actionVectors[actionIndex];
-    const stepSize = 2.0;
-    const newPos: [number, number, number] = [
-      Math.max(0, Math.min(100, s.dronePos[0] + move[0] * stepSize)),
-      Math.max(0, Math.min(100, s.dronePos[1] + move[1] * stepSize)),
-      Math.max(0, Math.min(100, s.dronePos[2] + move[2] * stepSize))
-    ];
-
-    const currentDist = Math.hypot(s.goalPos[0] - newPos[0], s.goalPos[1] - newPos[1], s.goalPos[2] - newPos[2]);
-    const prevDist = s.distToGoal;
-
-    let reward = -0.1;
-    if (currentDist < prevDist) reward += 1.0;
-    else reward -= 1.0;
-
-    // Check collision
-    let collision = false;
-    s.obstacles.forEach(o => {
-      const d = Math.hypot(newPos[0] - o.position[0], newPos[1] - o.position[1], newPos[2] - o.position[2]);
-      if (d <= o.radius + 0.8) collision = true;
-    });
-
-    const outOfBounds = newPos[0] <= 0 || newPos[0] >= 100 || newPos[1] <= 0 || newPos[1] >= 100 || newPos[2] <= 0 || newPos[2] >= 100;
-    const goalReached = currentDist <= 6.0;
-
-    let status: SimState['status'] = 'flying';
-    let successCount = s.successCount;
-    let collisionCount = s.collisionCount;
-
-    if (goalReached) {
-      reward += 100;
-      status = 'goal_reached';
-      successCount += 1;
-    } else if (collision || outOfBounds) {
-      reward -= 100;
-      status = collision ? 'collision' : 'out_of_bounds';
-      collisionCount += 1;
-    }
-
-    const updated: SimState = {
-      ...s,
-      dronePos: newPos,
-      droneVel: [move[0] * stepSize, move[1] * stepSize, move[2] * stepSize],
-      stepCount: s.stepCount + 1,
-      distToGoal: currentDist,
-      lastActionName: actionNames[actionIndex],
-      lastReward: reward,
-      totalReward: s.totalReward + reward,
-      status,
-      rayDistances: rayDists,
-      trajectory: [...s.trajectory, newPos],
-      successCount,
-      collisionCount
-    };
-
-    simRef.current = updated;
-    setUiState(updated);
-    if (onStateUpdate) onStateUpdate(updated);
-
-    if (status !== 'flying') {
-      setTimeout(() => {
-        resetEpisode();
-      }, 1200);
+      if (status !== 'flying') {
+        setTimeout(() => {
+          resetEpisode();
+        }, 1200);
+      }
+    } catch (err) {
+      console.error("Failed to execute step via API:", err);
+      setIsPlaying(false);
     }
   }, [mode, resetEpisode, onStateUpdate]);
 
-  // Ticking effect driven by simSpeed and play state
+  // Ticking effect driven by speedMultiplier and play state
   useEffect(() => {
     if (!isPlaying) return;
-    const intervalMs = Math.max(20, Math.floor(150 / simSpeed));
-    const timer = setInterval(() => {
-      executeStep();
+    const intervalMs = Math.max(20, Math.floor(150 / speedMultiplier));
+    
+    let isProcessing = false;
+    const timer = setInterval(async () => {
+      if (isProcessing) return;
+      isProcessing = true;
+      await executeStep();
+      isProcessing = false;
     }, intervalMs);
+    
     return () => clearInterval(timer);
-  }, [isPlaying, simSpeed, executeStep]);
+  }, [isPlaying, speedMultiplier, executeStep]);
 
   return (
-    <div className="relative w-full h-[600px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
+    <div className="relative w-full h-[600px] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-2xl flex flex-col">
       {/* 3D WebGL Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Top Floating Overlay Stats Bar */}
-      <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-800/80 text-xs shadow-lg">
+      <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-200 text-xs shadow-lg">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${uiState.status === 'flying' ? 'bg-emerald-400' : uiState.status === 'goal_reached' ? 'bg-amber-400' : 'bg-rose-400'} opacity-75`}></span>
               <span className={`relative inline-flex rounded-full h-3 w-3 ${uiState.status === 'flying' ? 'bg-emerald-500' : uiState.status === 'goal_reached' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
             </span>
-            <span className="font-semibold text-slate-200 uppercase tracking-wider">
+            <span className="font-semibold text-slate-800 uppercase tracking-wider">
               {uiState.status === 'flying' ? 'In Flight' : uiState.status === 'goal_reached' ? 'GOAL REACHED! (+100)' : 'COLLISION / OOB (-100)'}
             </span>
           </div>
-          <div className="h-4 w-[1px] bg-slate-800 hidden sm:block"></div>
-          <div className="hidden sm:flex items-center gap-3 text-slate-400">
-            <span>Ep: <strong className="text-slate-100 font-mono">{uiState.episodeCount}</strong></span>
-            <span>Step: <strong className="text-slate-100 font-mono">{uiState.stepCount}</strong></span>
-            <span>Action: <strong className="text-cyan-400 font-mono">{uiState.lastActionName}</strong></span>
+          <div className="h-4 w-[1px] bg-slate-300 hidden sm:block"></div>
+          <div className="hidden sm:flex items-center gap-3 text-slate-600">
+            <span>Ep: <strong className="text-slate-900 font-mono">{uiState.episodeCount}</strong></span>
+            <span>Step: <strong className="text-slate-900 font-mono">{uiState.stepCount}</strong></span>
+            <span>Action: <strong className="text-sky-600 font-mono">{uiState.lastActionName}</strong></span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-emerald-950/50 border border-emerald-800/50 px-2.5 py-1 rounded-lg text-emerald-400">
+          <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg text-emerald-700">
             <Target className="w-3.5 h-3.5" />
-            <span>Successes: <strong className="font-mono text-emerald-300">{uiState.successCount}</strong></span>
+            <span>Successes: <strong className="font-mono text-emerald-600">{uiState.successCount}</strong></span>
           </div>
-          <div className="flex items-center gap-1.5 bg-rose-950/50 border border-rose-800/50 px-2.5 py-1 rounded-lg text-rose-400">
+          <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg text-rose-700">
             <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Collisions: <strong className="font-mono text-rose-300">{uiState.collisionCount}</strong></span>
+            <span>Collisions: <strong className="font-mono text-rose-600">{uiState.collisionCount}</strong></span>
           </div>
         </div>
       </div>
 
       {/* Bottom Floating Control Bar */}
-      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-800 text-xs shadow-xl">
+      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-200 text-xs shadow-xl">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-medium transition-all shadow-md active:scale-95"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white font-medium transition-all shadow-md active:scale-95 ${isPlaying ? 'bg-rose-600 hover:bg-rose-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isPlaying ? 'Pause' : 'Resume'}</span>
+            <span>{isPlaying ? 'Pause' : 'Play'}</span>
           </button>
+          
+          {/* Speed Slider */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
+            <span className="text-slate-500 font-mono text-[10px] uppercase">Speed</span>
+            <input 
+              type="range" 
+              min="0.5" 
+              max="4" 
+              step="0.5"
+              value={speedMultiplier}
+              onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))}
+              className="w-20 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-sky-500"
+            />
+            <span className="text-sky-600 font-mono text-xs w-6">{speedMultiplier}x</span>
+          </div>
+
           <button
             onClick={resetEpisode}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-all active:scale-95 border border-slate-700"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-all active:scale-95 border border-slate-300 ml-2"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Env</span>
@@ -611,37 +548,37 @@ export function DroneSimulator3D({
         </div>
 
         {/* Camera Views Selector */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           <button
             onClick={() => setCameraMode('orbit')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'orbit' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/50' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'orbit' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
           >
             Orbit 3D
           </button>
           <button
             onClick={() => setCameraMode('follow')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'follow' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/50' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'follow' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
           >
             Follow Drone
           </button>
           <button
             onClick={() => setCameraMode('top')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'top' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/50' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'top' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
           >
             Top-Down 2D
           </button>
         </div>
 
         {/* Real-time Telemetry Readout */}
-        <div className="hidden lg:flex items-center gap-4 text-slate-300 font-mono text-[11px]">
+        <div className="hidden lg:flex items-center gap-4 text-slate-600 font-mono text-[11px]">
           <div>
-            Pos: <span className="text-cyan-400">[{uiState.dronePos.map(v => v.toFixed(1)).join(', ')}]</span>
+            Pos: <span className="text-sky-600">[{uiState.dronePos.map(v => v.toFixed(1)).join(', ')}]</span>
           </div>
           <div>
-            Goal Dist: <span className="text-amber-400">{uiState.distToGoal.toFixed(1)}m</span>
+            Goal Dist: <span className="text-amber-500">{uiState.distToGoal.toFixed(1)}m</span>
           </div>
           <div>
-            Total R: <span className={uiState.totalReward >= 0 ? 'text-emerald-400' : 'text-rose-400'}>{uiState.totalReward.toFixed(1)}</span>
+            Total R: <span className={uiState.totalReward >= 0 ? 'text-emerald-600' : 'text-rose-600'}>{uiState.totalReward.toFixed(1)}</span>
           </div>
         </div>
       </div>
