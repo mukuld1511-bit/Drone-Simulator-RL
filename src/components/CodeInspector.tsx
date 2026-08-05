@@ -84,44 +84,41 @@ python main.py --eval --resume-from-checkpoint checkpoints/best_dqn_drone.pth
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-4 rounded-xl shadow-lg">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-200 pb-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-            <FileCode className="w-5 h-5 text-cyan-400" />
-            <span>Python Project Deliverables (8 Complete Files)</span>
+          <h2 className="text-lg font-medium text-neutral-900 tracking-tight">
+            Python Source Code
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Strictly production-ready, type-hinted Gymnasium Env, PyTorch DQN, and Matplotlib visualizer suite.
+          <p className="text-sm text-neutral-500 mt-1">
+            Complete production-ready Gymnasium Env and PyTorch DQN implementation.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleDownloadZip}
-            disabled={isZipping}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md transition-all active:scale-95 disabled:opacity-50"
-          >
-            <FolderArchive className="w-4 h-4" />
-            <span>{isZipping ? 'Zipping Files...' : 'Download Project (.zip)'}</span>
-          </button>
-        </div>
+        <button
+          onClick={handleDownloadZip}
+          disabled={isZipping}
+          className="flex items-center gap-2 px-4 py-2 border border-neutral-900 text-neutral-900 bg-white hover:bg-neutral-50 text-xs font-semibold uppercase tracking-widest transition-colors disabled:opacity-50"
+        >
+          <FolderArchive className="w-4 h-4" />
+          <span>{isZipping ? 'Zipping...' : 'Download Project'}</span>
+        </button>
       </div>
 
       {/* Main IDE Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Sidebar: File Tree & Requirements checklist */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 shadow-lg space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Sidebar */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="space-y-4">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-neutral-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search files..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-white border border-neutral-200 rounded-none pl-9 pr-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors"
               />
             </div>
 
@@ -132,94 +129,80 @@ python main.py --eval --resume-from-checkpoint checkpoints/best_dqn_drone.pth
                   <button
                     key={file.id}
                     onClick={() => setSelectedFileId(file.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-mono transition-all flex items-center justify-between group ${
+                    className={`w-full text-left px-3 py-2 text-sm font-mono transition-colors flex items-center justify-between group ${
                       isSelected
-                        ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 font-medium'
-                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-slate-100'
+                        ? 'bg-neutral-900 text-white font-medium'
+                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileCode className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-400'}`} />
-                      <span className="truncate">{file.filename}</span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 shrink-0 uppercase">
-                      {file.filename.split('.').pop()}
-                    </span>
+                    <span className="truncate">{file.filename}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Code Requirements Compliance Checklist */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
-            <h3 className="text-xs font-semibold text-slate-200 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Project Requirements Verification</span>
+          <div className="pt-4 border-t border-neutral-200 space-y-3">
+            <h3 className="text-xs font-semibold text-neutral-900 uppercase tracking-widest">
+              Requirements Check
             </h3>
-
-            <div className="space-y-2 text-[11px] text-slate-300">
+            <div className="space-y-2 text-xs text-neutral-600">
               <div className="flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Gymnasium API:</strong> Env inherits <code>gymnasium.Env</code> returning tuple (obs, reward, terminated, truncated, info).</span>
+                <Check className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>Gymnasium Env API</span>
               </div>
               <div className="flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>DQN Q-Network:</strong> Input (16-20) → Dense(128, ReLU) → Dense(64, ReLU) → Output 6 Q-values.</span>
+                <Check className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>DQN Q-Network structure</span>
               </div>
               <div className="flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Sensor & Physics Guards:</strong> Ray-sphere collision detection with zero-division epsilon protection (1e-9).</span>
+                <Check className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>Sensor & collision physics</span>
               </div>
               <div className="flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>10,000 Episode Trainer:</strong> Target network sync, CSV metric logger, best & latest model checkpointing (.pth).</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>3D Matplotlib Visualizer:</strong> 3D trajectory plots with obstacles + 4-panel training metrics curves.</span>
+                <Check className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span>10k Episode Trainer</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Pane: Code Viewer & Actions */}
-        <div className="lg:col-span-8 bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col h-[650px]">
+        {/* Right Pane */}
+        <div className="lg:col-span-9 border border-neutral-200 bg-white flex flex-col h-[700px]">
           {/* File Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-950 border-b border-slate-800">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
             <div>
-              <div className="text-xs font-semibold text-slate-200 font-mono flex items-center gap-2">
-                <span>{selectedFile.filename}</span>
-                <span className="text-[11px] text-slate-500 font-sans font-normal">({selectedFile.title})</span>
+              <div className="text-sm font-medium text-neutral-900 font-mono">
+                {selectedFile.filename}
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5">{selectedFile.description}</div>
+              <div className="text-xs text-neutral-500 mt-1">{selectedFile.description}</div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={handleCopyCode}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all active:scale-95 border border-slate-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-neutral-600 hover:text-neutral-900 text-xs font-semibold uppercase tracking-widest transition-colors"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
-                <span>{copied ? 'Copied!' : 'Copy'}</span>
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
 
               <button
                 onClick={handleDownloadSingleFile}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950 hover:bg-cyan-900 text-cyan-300 text-xs font-medium transition-all active:scale-95 border border-cyan-800/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-neutral-600 hover:text-neutral-900 text-xs font-semibold uppercase tracking-widest transition-colors"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
+                <Download className="w-4 h-4" />
+                <span>Save</span>
               </button>
             </div>
           </div>
 
           {/* Code Body */}
-          <div className="flex-1 overflow-auto bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-200 select-text">
+          <div className="flex-1 overflow-auto bg-neutral-50 p-6 font-mono text-sm leading-relaxed text-neutral-800 select-text">
             <pre className="whitespace-pre">
               {selectedFile.code.split('\n').map((line, idx) => (
                 <div key={idx} className="table-row">
-                  <span className="table-cell pr-4 text-right select-none text-slate-600 text-[11px]">
+                  <span className="table-cell pr-6 text-right select-none text-neutral-400 text-xs">
                     {idx + 1}
                   </span>
                   <span className="table-cell">{line}</span>

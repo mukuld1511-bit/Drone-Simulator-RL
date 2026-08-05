@@ -142,8 +142,8 @@ export function DroneSimulator3D({
 
     // Scene, Camera, Renderer - Light Theme!
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf1f5f9);
-    scene.fog = new THREE.FogExp2(0xf1f5f9, 0.003);
+    scene.background = new THREE.Color(0xffffff);
+    scene.fog = new THREE.FogExp2(0xffffff, 0.003);
 
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 500);
     camera.position.set(130, 120, 160);
@@ -476,56 +476,56 @@ export function DroneSimulator3D({
   }, [isPlaying, speedMultiplier, executeStep]);
 
   return (
-    <div className="relative w-full h-[600px] bg-white rounded-xl overflow-hidden border border-slate-200 shadow-2xl flex flex-col">
+    <div className="relative w-full h-[600px] bg-white overflow-hidden border border-neutral-200 flex flex-col">
       {/* 3D WebGL Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Top Floating Overlay Stats Bar */}
-      <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-200 text-xs shadow-lg">
+      <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 border border-neutral-200 text-xs shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${uiState.status === 'flying' ? 'bg-emerald-400' : uiState.status === 'goal_reached' ? 'bg-amber-400' : 'bg-rose-400'} opacity-75`}></span>
-              <span className={`relative inline-flex rounded-full h-3 w-3 ${uiState.status === 'flying' ? 'bg-emerald-500' : uiState.status === 'goal_reached' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${uiState.status === 'flying' ? 'bg-neutral-800' : uiState.status === 'goal_reached' ? 'bg-neutral-800' : 'bg-neutral-800'} opacity-50`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${uiState.status === 'flying' ? 'bg-neutral-900' : uiState.status === 'goal_reached' ? 'bg-neutral-900' : 'bg-neutral-900'}`}></span>
             </span>
-            <span className="font-semibold text-slate-800 uppercase tracking-wider">
-              {uiState.status === 'flying' ? 'In Flight' : uiState.status === 'goal_reached' ? 'GOAL REACHED! (+100)' : 'COLLISION / OOB (-100)'}
+            <span className="font-medium text-neutral-900 uppercase tracking-widest text-[10px]">
+              {uiState.status === 'flying' ? 'In Flight' : uiState.status === 'goal_reached' ? 'GOAL REACHED' : 'COLLISION / OOB'}
             </span>
           </div>
-          <div className="h-4 w-[1px] bg-slate-300 hidden sm:block"></div>
-          <div className="hidden sm:flex items-center gap-3 text-slate-600">
-            <span>Ep: <strong className="text-slate-900 font-mono">{uiState.episodeCount}</strong></span>
-            <span>Step: <strong className="text-slate-900 font-mono">{uiState.stepCount}</strong></span>
-            <span>Action: <strong className="text-sky-600 font-mono">{uiState.lastActionName}</strong></span>
+          <div className="h-4 w-[1px] bg-neutral-200 hidden sm:block"></div>
+          <div className="hidden sm:flex items-center gap-4 text-neutral-500 uppercase tracking-widest text-[10px]">
+            <span>Ep <strong className="text-neutral-900 font-mono">{uiState.episodeCount}</strong></span>
+            <span>Step <strong className="text-neutral-900 font-mono">{uiState.stepCount}</strong></span>
+            <span>Action <strong className="text-neutral-900 font-mono">{uiState.lastActionName}</strong></span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg text-emerald-700">
-            <Target className="w-3.5 h-3.5" />
-            <span>Successes: <strong className="font-mono text-emerald-600">{uiState.successCount}</strong></span>
+        <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-neutral-600">
+            <Target className="w-3 h-3" />
+            <span>Success <strong className="font-mono text-neutral-900">{uiState.successCount}</strong></span>
           </div>
-          <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg text-rose-700">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Collisions: <strong className="font-mono text-rose-600">{uiState.collisionCount}</strong></span>
+          <div className="flex items-center gap-1.5 text-neutral-600">
+            <ShieldAlert className="w-3 h-3" />
+            <span>Collision <strong className="font-mono text-neutral-900">{uiState.collisionCount}</strong></span>
           </div>
         </div>
       </div>
 
       {/* Bottom Floating Control Bar */}
-      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-200 text-xs shadow-xl">
-        <div className="flex items-center gap-2">
+      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 border border-neutral-200 text-xs shadow-sm">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white font-medium transition-all shadow-md active:scale-95 ${isPlaying ? 'bg-rose-600 hover:bg-rose-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-neutral-900 font-medium uppercase tracking-widest text-[10px] transition-colors border border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100`}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
             <span>{isPlaying ? 'Pause' : 'Play'}</span>
           </button>
           
           {/* Speed Slider */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
-            <span className="text-slate-500 font-mono text-[10px] uppercase">Speed</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 border border-neutral-200">
+            <span className="text-neutral-500 font-medium tracking-widest text-[10px] uppercase">Speed</span>
             <input 
               type="range" 
               min="0.5" 
@@ -533,52 +533,52 @@ export function DroneSimulator3D({
               step="0.5"
               value={speedMultiplier}
               onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))}
-              className="w-20 h-1.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-sky-500"
+              className="w-16 h-1 bg-neutral-200 appearance-none cursor-pointer accent-neutral-900"
             />
-            <span className="text-sky-600 font-mono text-xs w-6">{speedMultiplier}x</span>
+            <span className="text-neutral-900 font-mono text-[10px] w-6">{speedMultiplier}x</span>
           </div>
 
           <button
             onClick={resetEpisode}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-all active:scale-95 border border-slate-300 ml-2"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-neutral-900 font-medium uppercase tracking-widest text-[10px] transition-colors border border-neutral-200 hover:bg-neutral-50 active:bg-neutral-100"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Env</span>
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset</span>
           </button>
         </div>
 
         {/* Camera Views Selector */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-neutral-50 p-1 border border-neutral-200">
           <button
             onClick={() => setCameraMode('orbit')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'orbit' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1 text-[10px] font-medium uppercase tracking-widest transition-colors ${cameraMode === 'orbit' ? 'bg-white border-neutral-200 text-neutral-900 shadow-sm' : 'border-transparent text-neutral-500 hover:text-neutral-900'}`}
           >
-            Orbit 3D
+            Orbit
           </button>
           <button
             onClick={() => setCameraMode('follow')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'follow' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1 text-[10px] font-medium uppercase tracking-widest transition-colors ${cameraMode === 'follow' ? 'bg-white border-neutral-200 text-neutral-900 shadow-sm' : 'border-transparent text-neutral-500 hover:text-neutral-900'}`}
           >
-            Follow Drone
+            Follow
           </button>
           <button
             onClick={() => setCameraMode('top')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${cameraMode === 'top' ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1 text-[10px] font-medium uppercase tracking-widest transition-colors ${cameraMode === 'top' ? 'bg-white border-neutral-200 text-neutral-900 shadow-sm' : 'border-transparent text-neutral-500 hover:text-neutral-900'}`}
           >
-            Top-Down 2D
+            Top
           </button>
         </div>
 
         {/* Real-time Telemetry Readout */}
-        <div className="hidden lg:flex items-center gap-4 text-slate-600 font-mono text-[11px]">
+        <div className="hidden lg:flex items-center gap-4 text-neutral-500 font-mono text-[10px] uppercase tracking-widest">
           <div>
-            Pos: <span className="text-sky-600">[{uiState.dronePos.map(v => v.toFixed(1)).join(', ')}]</span>
+            Pos <span className="text-neutral-900">[{uiState.dronePos.map(v => v.toFixed(1)).join(', ')}]</span>
           </div>
           <div>
-            Goal Dist: <span className="text-amber-500">{uiState.distToGoal.toFixed(1)}m</span>
+            Goal <span className="text-neutral-900">{uiState.distToGoal.toFixed(1)}m</span>
           </div>
           <div>
-            Total R: <span className={uiState.totalReward >= 0 ? 'text-emerald-600' : 'text-rose-600'}>{uiState.totalReward.toFixed(1)}</span>
+            Total R <span className="text-neutral-900">{uiState.totalReward.toFixed(1)}</span>
           </div>
         </div>
       </div>

@@ -4,7 +4,6 @@ import { MetricsDashboard } from './components/MetricsDashboard';
 import { CodeInspector } from './components/CodeInspector';
 import { HyperparameterPanel } from './components/HyperparameterPanel';
 import { ArchitectureOverview } from './components/ArchitectureOverview';
-import { Box, Activity, Code2, BookOpen, Download, Cpu, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'sim' | 'metrics' | 'code' | 'docs'>('sim');
@@ -16,133 +15,108 @@ export default function App() {
   const [mode, setMode] = useState<'policy' | 'training' | 'teleop'>('policy');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-sky-500 selection:text-white">
-      {/* Navigation Top Header */}
-      <header className="border-b border-slate-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-sky-100 border border-sky-200 rounded-xl text-sky-600">
-              <Cpu className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>Autonomous Drone Navigation</span>
-                <span className="text-[10px] font-mono bg-sky-100 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full uppercase">
-                  Deep RL (DQN)
-                </span>
-              </h1>
-              <p className="text-[11px] text-slate-500">3D Gymnasium Env, PyTorch Agent & 8 Complete Deliverables</p>
-            </div>
+    <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-neutral-200 selection:text-neutral-900">
+      {/* Top Header */}
+      <header className="border-b border-neutral-200 bg-white sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex flex-col">
+            <h1 className="text-sm font-semibold tracking-wide text-neutral-900">
+              DRONE NAV
+            </h1>
+            <span className="text-xs text-neutral-500 uppercase tracking-widest">
+              Deep Q-Network
+            </span>
           </div>
 
           {/* Nav Tabs */}
-          <nav className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+          <nav className="flex items-center gap-6 text-sm font-medium">
             <button
               onClick={() => setActiveTab('sim')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === 'sim' ? 'bg-white text-sky-600 border border-slate-200 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`pb-1 transition-colors border-b-2 ${
+                activeTab === 'sim' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'
               }`}
             >
-              <Box className="w-4 h-4" />
-              <span>3D WebGL Simulator</span>
+              Simulator
             </button>
-
             <button
               onClick={() => setActiveTab('metrics')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === 'metrics' ? 'bg-white text-sky-600 border border-slate-200 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`pb-1 transition-colors border-b-2 ${
+                activeTab === 'metrics' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'
               }`}
             >
-              <Activity className="w-4 h-4" />
-              <span>Training Analytics</span>
+              Metrics
             </button>
-
             <button
               onClick={() => setActiveTab('code')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === 'code' ? 'bg-white text-sky-600 border border-slate-200 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`pb-1 transition-colors border-b-2 ${
+                activeTab === 'code' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'
               }`}
             >
-              <Code2 className="w-4 h-4" />
-              <span>Python Code (8 Files)</span>
+              Code
             </button>
-
             <button
               onClick={() => setActiveTab('docs')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-                activeTab === 'docs' ? 'bg-white text-sky-600 border border-slate-200 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`pb-1 transition-colors border-b-2 ${
+                activeTab === 'docs' ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-400 hover:text-neutral-600'
               }`}
             >
-              <BookOpen className="w-4 h-4" />
-              <span>Architecture & Specs</span>
+              Architecture
             </button>
           </nav>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="max-w-6xl mx-auto px-6 py-12 space-y-12">
         {activeTab === 'sim' && (
-          <div className="space-y-6">
-            {/* Hero Section */}
-            <div className="flex flex-col md:flex-row items-center justify-between bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-              <div className="max-w-xl">
-                <div className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-bold tracking-wide mb-4">
-                  DEEP REINFORCEMENT LEARNING
+          <div className="space-y-12">
+            {/* Hero Section - Minimalist */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-3xl font-medium tracking-tight text-neutral-900">
+                Autonomous Navigation
+              </h2>
+              <p className="text-neutral-500 text-sm max-w-2xl leading-relaxed">
+                A Deep Q-Network agent navigating a 3D obstacle field. The neural network processes LiDAR-like raycasts and makes real-time control decisions. Trained over 10,000 episodes.
+              </p>
+              <div className="flex gap-8 mt-4 pt-4 border-t border-neutral-100">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-light text-neutral-900">10k+</span>
+                  <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Episodes</span>
                 </div>
-                <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
-                  Autonomous <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-500">Drone Navigation</span>
-                </h2>
-                <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                  A Deep Q-Network agent trained for 10,000 episodes to autonomously navigate a 3D obstacle field. Watch the trained neural network make real-time decisions below in the WebGL canvas.
-                </p>
-                <div className="flex gap-4">
-                  <div className="text-center bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">
-                    <div className="text-xl font-bold text-slate-800">10k+</div>
-                    <div className="text-[10px] text-slate-500 uppercase font-semibold">Episodes</div>
-                  </div>
-                  <div className="text-center bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">
-                    <div className="text-xl font-bold text-slate-800">85%</div>
-                    <div className="text-[10px] text-slate-500 uppercase font-semibold">Success</div>
-                  </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-light text-neutral-900">85%</span>
+                  <span className="text-[10px] text-neutral-400 uppercase tracking-widest">Success Rate</span>
                 </div>
-              </div>
-              <div className="relative mt-8 md:mt-0">
-                <div className="absolute inset-0 bg-sky-100 blur-3xl opacity-50 rounded-full w-64 h-64 m-auto"></div>
-                <img src="/drone_hero.png" alt="Drone" className="relative z-10 w-80 drop-shadow-2xl animate-[float_4s_ease-in-out_infinite]" />
-                <style>{`
-                  @keyframes float {
-                    0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-15px); }
-                  }
-                `}</style>
               </div>
             </div>
 
-            <HyperparameterPanel
-              numRays={numRays}
-              setNumRays={setNumRays}
-              numObstacles={numObstacles}
-              setNumObstacles={setNumObstacles}
-              simSpeed={simSpeed}
-              setSimSpeed={setSimSpeed}
-              mode={mode}
-              setMode={setMode}
-            />
-
-            <DroneSimulator3D
-              numRays={numRays}
-              numObstacles={numObstacles}
-              simSpeed={simSpeed}
-              mode={mode}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-1 border border-neutral-200 p-6 bg-neutral-50">
+                <HyperparameterPanel
+                  numRays={numRays}
+                  setNumRays={setNumRays}
+                  numObstacles={numObstacles}
+                  setNumObstacles={setNumObstacles}
+                  simSpeed={simSpeed}
+                  setSimSpeed={setSimSpeed}
+                  mode={mode}
+                  setMode={setMode}
+                />
+              </div>
+              <div className="lg:col-span-3 border border-neutral-200 bg-white">
+                <DroneSimulator3D
+                  numRays={numRays}
+                  numObstacles={numObstacles}
+                  simSpeed={simSpeed}
+                  mode={mode}
+                />
+              </div>
+            </div>
           </div>
         )}
 
         {activeTab === 'metrics' && <MetricsDashboard />}
-
         {activeTab === 'code' && <CodeInspector />}
-
         {activeTab === 'docs' && <ArchitectureOverview />}
       </main>
     </div>
