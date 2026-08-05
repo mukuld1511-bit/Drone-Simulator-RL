@@ -1,0 +1,6 @@
+{
+  "name": "Autonomous Drone Navigation Deep RL",
+  "description": "3D Deep RL autonomous drone navigation suite with Gymnasium environment, PyTorch DQN agent, interactive 3D WebGL simulator, ray casting visualizer, training analytics, and 8 complete Python deliverables.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
