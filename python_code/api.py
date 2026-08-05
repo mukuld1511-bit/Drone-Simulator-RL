@@ -90,10 +90,19 @@ def reset_env():
     # Reset environment
     current_obs, info = env.reset()
     
+    def to_list(val):
+        return val.tolist() if hasattr(val, 'tolist') else val
+        
     return jsonify({
-        "drone_pos": info["drone_pos"],
-        "goal_pos": info["goal_pos"],
-        "obstacles": env.obstacles,
+        "drone_pos": to_list(info["drone_pos"]),
+        "goal_pos": to_list(info["goal_pos"]),
+        "obstacles": [
+            {
+                "id": i,
+                "position": to_list(obs[0]),
+                "radius": obs[1]
+            } for i, obs in enumerate(env.obstacles)
+        ],
         "world_size": env.config.world_size
     })
 
@@ -126,9 +135,12 @@ def predict_step():
     # Update current observation
     current_obs = next_obs
     
+    def to_list(val):
+        return val.tolist() if hasattr(val, 'tolist') else val
+
     return jsonify({
         "action": action,
-        "drone_pos": info["drone_pos"],
+        "drone_pos": to_list(info["drone_pos"]),
         "reward": float(reward),
         "terminated": bool(terminated),
         "truncated": bool(truncated),
