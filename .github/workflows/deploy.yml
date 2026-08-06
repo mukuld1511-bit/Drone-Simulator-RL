@@ -37,8 +37,9 @@ jobs:
         with:
           name: python-app
           path: |
-            python_code/
+            .
             !antenv/
+            !.git/
 
   # ──────────────────────────────────────────────
   # JOB 2: Deploy Backend → Azure
