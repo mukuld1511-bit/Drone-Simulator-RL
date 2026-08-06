@@ -17,7 +17,8 @@ CORS(app, origins=[
     "http://localhost:3000",
     "http://localhost:5173",
     "https://drone-simulator-rl.vercel.app",
-    "https://*.vercel.app"
+    "https://*.vercel.app",
+    "https://drone-simulator-api-d8bdbafvevhthdah.eastasia-01.azurewebsites.net"
 ])
 
 # Initialize Config, Environment and Agent globally
