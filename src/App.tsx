@@ -22,7 +22,7 @@ export default function App() {
   const [mode, setMode] = useState<'policy' | 'training' | 'teleop'>('policy');
 
   return (
-    <div className="min-h-screen bg-transparent text-white selection:bg-[#ff5500] selection:text-white">
+    <div className="min-h-screen bg-[#fafafa] text-neutral-900 selection:bg-[#ff5500] selection:text-white">
 
       {/* ── Header ───────────────────────────────────────────── */}
       <header className="glass-nav sticky top-0 z-50">
@@ -30,7 +30,7 @@ export default function App() {
 
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <span className="text-xs font-black tracking-widest uppercase text-white drop-shadow-[0_0_10px_rgba(255,85,0,0.5)]">
+            <span className="text-xs font-black tracking-widest uppercase text-neutral-900">
               DroneNav
             </span>
             <span className="hidden sm:inline text-[10px] font-medium text-[#ff5500] uppercase tracking-widest border border-[#ff5500]/30 bg-[#ff5500]/10 px-2 py-0.5 rounded-full">
@@ -72,18 +72,18 @@ export default function App() {
 
               {/* Big heading */}
               <h1 className="text-6xl sm:text-7xl font-display font-black tracking-tighter leading-[0.9] max-w-4xl">
-                <span className="text-white">Autonomous</span><br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5500] to-[#ffaa00] drop-shadow-[0_0_20px_rgba(255,85,0,0.3)]">Drone Navigation</span>
+                <span className="text-neutral-900">Autonomous</span><br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5500] to-[#ffaa00]">Drone Navigation</span>
               </h1>
 
               {/* Descriptor */}
-              <p className="text-sm text-neutral-400 max-w-xl leading-relaxed font-light">
+              <p className="text-sm text-neutral-600 max-w-xl leading-relaxed font-light">
                 A DQN agent processes LiDAR-like raycasts and makes real-time 3D control decisions.
                 Trained over 10,000 episodes with target network sync and shaped reward shaping.
               </p>
 
               {/* Stats bar */}
-              <div className="flex flex-wrap gap-10 pt-8 border-t border-white/10">
+              <div className="flex flex-wrap gap-10 pt-8 border-t border-neutral-200">
                 {[
                   { value: '10k+',  label: 'Episodes'    },
                   { value: '85%',   label: 'Success Rate' },
@@ -91,7 +91,7 @@ export default function App() {
                   { value: '18',    label: 'Obs Dims'     },
                 ].map(({ value, label }) => (
                   <div key={label} className="flex flex-col gap-1">
-                    <span className="text-4xl font-display font-black tracking-tight text-white leading-none">
+                    <span className="text-4xl font-display font-black tracking-tight text-neutral-900 leading-none">
                       {value}
                     </span>
                     <span className="text-[10px] font-bold text-[#ff5500] uppercase tracking-widest">
@@ -137,7 +137,7 @@ export default function App() {
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#ff5500] mb-2">
                 Training Analytics
               </p>
-              <h2 className="text-4xl font-display font-black tracking-tighter text-white">
+              <h2 className="text-4xl font-display font-black tracking-tighter text-neutral-900">
                 Performance Metrics
               </h2>
             </div>
@@ -151,7 +151,7 @@ export default function App() {
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#ff5500] mb-2">
                 Source Files
               </p>
-              <h2 className="text-4xl font-display font-black tracking-tighter text-white">
+              <h2 className="text-4xl font-display font-black tracking-tighter text-neutral-900">
                 Python Codebase
               </h2>
             </div>
@@ -165,7 +165,7 @@ export default function App() {
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#ff5500] mb-2">
                 System Design
               </p>
-              <h2 className="text-4xl font-display font-black tracking-tighter text-white">
+              <h2 className="text-4xl font-display font-black tracking-tighter text-neutral-900">
                 Architecture Overview
               </h2>
             </div>
@@ -176,10 +176,10 @@ export default function App() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────── */}
-      <footer className="border-t border-white/10 mt-24">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-500">
+      <footer className="border-t border-neutral-200 mt-24">
+        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-400">
           <span>Drone Nav · DQN · 2026</span>
-          <span className="text-[#ff5500]/50">Gymnasium · PyTorch · Three.js</span>
+          <span className="text-[#ff5500]">Gymnasium · PyTorch · Three.js</span>
         </div>
       </footer>
     </div>
