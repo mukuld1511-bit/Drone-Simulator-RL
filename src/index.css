@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Seaweed+Script&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -19,8 +19,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .font-display {
-  font-family: 'Syne', sans-serif;
-  letter-spacing: -0.03em;
+  font-family: 'Seaweed Script', cursive;
+  letter-spacing: 0em;
 }
 
 .glass-panel {
