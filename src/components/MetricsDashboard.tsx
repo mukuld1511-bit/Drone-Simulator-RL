@@ -39,7 +39,7 @@ export function MetricsDashboard() {
   if (error) {
     return (
       <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
-        Error loading metrics: {error}. Make sure the Python backend is running on port 5000.
+        Error loading metrics: {error}. Check if Azure backend is reachable and CORS is allowed.
       </div>
     );
   }

@@ -13,13 +13,7 @@ from drone_env import DroneEnvironment
 from dqn_agent import DQNAgent
 
 app = Flask(__name__)
-CORS(app, origins=[
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://drone-simulator-rl.vercel.app",
-    "https://*.vercel.app",
-    "https://drone-simulator-api-d8bdbafvevhthdah.eastasia-01.azurewebsites.net"
-])
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Initialize Config, Environment and Agent globally
 config = DroneConfig()
