@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Prevent concurrent deployments — cancel old run if new push comes in
+concurrency:
+  group: azure-deploy
+  cancel-in-progress: true
+
 jobs:
   # ──────────────────────────────────────────────
   # JOB 1: Build Python Backend
