@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
 import { TrendingUp, Award, Zap, AlertTriangle } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 export function MetricsDashboard() {
   const [metrics, setMetrics] = useState<any[]>([]);
@@ -10,7 +11,7 @@ export function MetricsDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/metrics')
+    fetch(apiUrl('/api/metrics'))
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch metrics');
         return res.json();

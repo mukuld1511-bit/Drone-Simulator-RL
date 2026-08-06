@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Play, Pause, RotateCcw, Compass, ShieldAlert, Target, Zap, Cpu, Eye } from 'lucide-react';
+import { apiUrl } from '../lib/api';
 
 interface Obstacle {
   id: number;
@@ -88,7 +89,7 @@ export function DroneSimulator3D({
   // Reset World Episode
   const resetEpisode = useCallback(async () => {
     try {
-      const response = await fetch('/api/reset', {
+      const response = await fetch(apiUrl('/api/reset'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numObstacles, numRays })
@@ -401,7 +402,7 @@ export function DroneSimulator3D({
     }
 
     try {
-      const response = await fetch('/api/predict', {
+      const response = await fetch(apiUrl('/api/predict'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode })
