@@ -26,11 +26,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install dependencies for Azure
         run: |
-          python -m venv antenv
-          source antenv/bin/activate
-          pip install -r python_code/requirements.txt
+          pip install --target=".python_packages/lib/site-packages" -r python_code/requirements.txt
 
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
