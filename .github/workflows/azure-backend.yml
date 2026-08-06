@@ -1,7 +1,0 @@
-# DISABLED - Using main_drone-simulator-api.yml (Azure auto-generated) instead
-# Having two workflows deploying simultaneously caused 409 Conflict errors
-
-name: Deploy Flask Backend to Azure (DISABLED)
-
-on:
-  workflow_dispatch:  # Manual trigger only - not auto on push
