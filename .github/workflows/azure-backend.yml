@@ -1,33 +1,7 @@
-name: Deploy Flask Backend to Azure
+# DISABLED - Using main_drone-simulator-api.yml (Azure auto-generated) instead
+# Having two workflows deploying simultaneously caused 409 Conflict errors
+
+name: Deploy Flask Backend to Azure (DISABLED)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'python_code/**'
-      - 'startup.sh'
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          pip install -r python_code/requirements.txt
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ secrets.AZURE_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: python_code
+  workflow_dispatch:  # Manual trigger only - not auto on push
