@@ -11,6 +11,11 @@ sys.path.insert(0, BASE_DIR)
 from config import DroneConfig
 from drone_env import DroneEnvironment
 from dqn_agent import DQNAgent
+import torch
+
+# Optimize PyTorch for single-core Azure Free Tier to prevent CPU throttling/lag
+torch.set_num_threads(1)
+torch.set_grad_enabled(False)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
